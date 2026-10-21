@@ -9,6 +9,7 @@
     "vite": "vite",
     "preview": "vite build --config vite.preview.config.js && vite preview --config vite.preview.config.js --port 5174",
     "build": "tauri build",
+    "clean": "node scripts/clean.mjs",
     "tauri": "tauri"
   },
   "devDependencies": {

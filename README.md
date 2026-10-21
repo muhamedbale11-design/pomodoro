@@ -187,7 +187,7 @@ the conventions for adding features.
 The same source tree builds for Android. On macOS:
 
 ```bash
-# 1. Toolchain: JDK 17, Android SDK (platform 35, build-tools 35, NDK 27)
+# 1. Toolchain: JDK 17, Android SDK (platform 37, build-tools 36, NDK 27)
 #    and the Rust Android targets.
 rustup target add aarch64-linux-android armv7-linux-androideabi \
                  i686-linux-android x86_64-linux-android
