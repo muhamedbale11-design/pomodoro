@@ -112,6 +112,64 @@ drift out of sync. It accepts query parameters for previewing different states:
 &opacity=0..100               &key=space|s|r|n|1|2|3|4
 ```
 
+## Publishing
+
+### Open source (ready now)
+
+This project is MIT licensed and set up for public contribution: `LICENSE`,
+`CONTRIBUTING.md`, a GitHub Actions workflow that tests and builds on macOS,
+Windows and Linux, and a clean git history on `main`.
+
+To publish it:
+
+```bash
+git remote add origin git@github.com:<you>/pomodoro.git
+git push -u origin main
+```
+
+> The repository currently uses a local placeholder git identity
+> (`mohamedalaa@users.noreply.github.com`). Set your real name and email with
+> `git config user.name "..."` / `git config user.email "..."` before pushing.
+
+### Mac App Store
+
+Possible, with some caveats. You need an Apple Developer Program membership
+($99/year) and Tauri v2's App Store support.
+
+- The app must be **sandboxed** and signed with a distribution certificate;
+  `tauri.conf.json` needs an `entitlements` file and the `bundle.macOS`
+  section configured for App Store distribution.
+- Signing and notarisation are driven by `APPLE_CERTIFICATE`,
+  `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_TEAM_ID` and
+  `APPLE_PASSWORD` environment variables.
+- **The menu bar tray must be disabled for the App Store build.** Apple rejects
+  agent-style (menu bar only) apps, so the tray should be behind a Cargo
+  feature that is off for App Store builds.
+- Storing data in the app container (as this app does) is sandbox-safe.
+
+### Google Play Store
+
+Also possible — Tauri v2 targets Android from the same source tree.
+
+- Requires the Google Play Console ($25 one-off), the Android SDK/NDK and
+  JDK 17, then `npx tauri android init`.
+- Rust targets needed: `aarch64-linux-android`,
+  `armv7-linux-androideabi`, `x86_64-linux-android`.
+- Build with `npx tauri android build --apk` for testing and
+  `--aab` for the Play Console upload. 64-bit is required, and Play needs a
+  privacy policy and a data-safety declaration.
+- The code here is already mobile-ready: the menu bar tray is compiled out on
+  mobile (`#[cfg(desktop)]`), and notifications work on Android.
+
+### iOS App Store
+
+Tauri v2 supports iOS from a Mac with Xcode installed:
+
+```bash
+npx tauri ios init
+npx tauri ios build
+```
+
 ## License
 
 Released under the [MIT License](LICENSE). Use it, fork it, ship it — just keep

@@ -5,10 +5,13 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use tauri::menu::{Menu, MenuItem};
-use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_notification::NotificationExt;
+
+#[cfg(desktop)]
+use tauri::menu::{Menu, MenuItem};
+#[cfg(desktop)]
+use tauri::tray::TrayIconBuilder;
 
 use store::{
     DailyStats, Goal, GoalKind, GoalScope, Priority, Store, ThemePrefs, Todo, Totals,
@@ -294,6 +297,7 @@ fn spawn_ticker(app: AppHandle) {
 // Tray / menu bar
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Show Pomodoro", true, None::<&str>)?;
     let toggle = MenuItem::with_id(app, "toggle", "Start / Pause", true, None::<&str>)?;
@@ -356,6 +360,7 @@ pub fn run() {
             });
 
             spawn_ticker(app.handle().clone());
+            #[cfg(desktop)]
             build_tray(app.handle())?;
             Ok(())
         })
@@ -385,17 +390,25 @@ pub fn run() {
         .expect("error while building tauri application");
 
     // Show the window again when the macOS dock icon is clicked.
-    app.run(|handle, event| {
-        if let tauri::RunEvent::Reopen {
-            has_visible_windows, ..
-        } = event
-        {
-            if !has_visible_windows {
-                if let Some(window) = handle.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
+    app.run(|handle, event| on_run_event(handle, event));
+}
+
+/// macOS delivers `Reopen` when the dock icon is clicked; other platforms
+/// have no equivalent event, so this is a no-op there.
+#[cfg(target_os = "macos")]
+fn on_run_event(handle: &AppHandle, event: tauri::RunEvent) {
+    if let tauri::RunEvent::Reopen {
+        has_visible_windows, ..
+    } = event
+    {
+        if !has_visible_windows {
+            if let Some(window) = handle.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
             }
         }
-    });
+    }
 }
+
+#[cfg(not(target_os = "macos"))]
+fn on_run_event(_handle: &AppHandle, _event: tauri::RunEvent) {}
