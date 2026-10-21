@@ -1,0 +1,1189 @@
+/* ==========================================================================
+   Theme tokens
+
+   Each theme supplies RGB triplets plus a few fixed alphas. The panel
+   background alpha (--panel-alpha) is user-controllable at runtime, so the
+   glass can be tuned from fully transparent to fully opaque.
+   ========================================================================== */
+body {
+  --blur: 18px;
+  --accent: #ff6b57;
+  --accent-soft: rgba(255, 107, 87, 0.16);
+  --radius: 18px;
+  --radius-sm: 11px;
+  --break: #4cc38a;
+  --break-soft: rgba(76, 195, 138, 0.16);
+  --ring-circumference: 628.318;
+  --danger: #e5484d;
+
+  /* Defaults; overridden per theme below. */
+  --panel-rgb: 255 255 255;
+  --panel-alpha: 0.06;
+  --panel-2-rgb: 255 255 255;
+  --panel-2-alpha: 0.1;
+  --border-rgb: 255 255 255;
+  --border-alpha: 0.12;
+  --input-rgb: 0 0 0;
+  --input-alpha: 0.3;
+  --panel-solid: #161a22;
+
+  /* Derived surfaces. */
+  --panel-bg: rgb(var(--panel-rgb) / var(--panel-alpha));
+  --panel-2-bg: rgb(var(--panel-2-rgb) / var(--panel-2-alpha));
+  --border-color: rgb(var(--border-rgb) / var(--border-alpha));
+  --input-bg: rgb(var(--input-rgb) / var(--input-alpha));
+}
+
+body.theme-glass-dark {
+  --bg: #090b10;
+  --text: #eef1f7;
+  --text-dim: #98a0b1;
+  --panel-rgb: 255 255 255;
+  --panel-2-rgb: 255 255 255;
+  --panel-2-alpha: 0.1;
+  --border-rgb: 255 255 255;
+  --border-alpha: 0.12;
+  --input-rgb: 0 0 0;
+  --input-alpha: 0.3;
+  --panel-solid: #161a22;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.42);
+  --blob-1: rgba(255, 107, 87, 0.5);
+  --blob-2: rgba(124, 92, 255, 0.42);
+  --blob-3: rgba(76, 195, 138, 0.34);
+  --glass-sat: 150%;
+}
+
+body.theme-glass-light {
+  --bg: #e7ebf3;
+  --text: #191f2c;
+  --text-dim: #5b6376;
+  --panel-rgb: 255 255 255;
+  --panel-2-rgb: 255 255 255;
+  --panel-2-alpha: 0.6;
+  --border-rgb: 255 255 255;
+  --border-alpha: 0.65;
+  --input-rgb: 255 255 255;
+  --input-alpha: 0.55;
+  --panel-solid: #ffffff;
+  --shadow: 0 12px 30px rgba(58, 68, 96, 0.16);
+  --blob-1: rgba(255, 146, 112, 0.5);
+  --blob-2: rgba(126, 108, 255, 0.38);
+  --blob-3: rgba(86, 200, 160, 0.35);
+  --glass-sat: 180%;
+}
+
+body.theme-solid-dark {
+  --bg: #0d1016;
+  --text: #eef1f7;
+  --text-dim: #98a0b1;
+  --panel-rgb: 22 26 34;
+  --panel-2-rgb: 29 34 44;
+  --panel-2-alpha: 1;
+  --border-rgb: 38 44 56;
+  --border-alpha: 1;
+  --input-rgb: 16 20 27;
+  --input-alpha: 1;
+  --panel-solid: #161a22;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --blob-1: rgba(255, 107, 87, 0.22);
+  --blob-2: rgba(124, 92, 255, 0.2);
+  --blob-3: rgba(76, 195, 138, 0.16);
+  --glass-sat: 100%;
+}
+
+body.theme-aurora {
+  --bg: #07060f;
+  --text: #f2f0ff;
+  --text-dim: #a29ec4;
+  --panel-rgb: 255 255 255;
+  --panel-2-rgb: 255 255 255;
+  --panel-2-alpha: 0.12;
+  --border-rgb: 255 255 255;
+  --border-alpha: 0.14;
+  --input-rgb: 10 8 24;
+  --input-alpha: 0.42;
+  --panel-solid: #14112a;
+  --shadow: 0 14px 46px rgba(0, 0, 0, 0.5);
+  --blob-1: rgba(255, 60, 130, 0.5);
+  --blob-2: rgba(90, 60, 255, 0.55);
+  --blob-3: rgba(0, 200, 255, 0.4);
+  --glass-sat: 190%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-y: auto;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* ==========================================================================
+   Aurora background (gives the glass something to blur)
+   ========================================================================== */
+.aurora {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.aurora__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.85;
+}
+
+.aurora__blob--1 {
+  width: 460px;
+  height: 460px;
+  top: -140px;
+  left: -110px;
+  background: var(--blob-1);
+  animation: drift1 26s ease-in-out infinite alternate;
+}
+
+.aurora__blob--2 {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  right: -120px;
+  background: var(--blob-2);
+  animation: drift2 32s ease-in-out infinite alternate;
+}
+
+.aurora__blob--3 {
+  width: 360px;
+  height: 360px;
+  top: 38%;
+  left: 32%;
+  background: var(--blob-3);
+  animation: drift3 38s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  to { transform: translate3d(70px, 60px, 0) scale(1.15); }
+}
+@keyframes drift2 {
+  to { transform: translate3d(-60px, -50px, 0) scale(1.1); }
+}
+@keyframes drift3 {
+  to { transform: translate3d(50px, -70px, 0) scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora__blob { animation: none; }
+}
+
+/* ==========================================================================
+   Glass surface
+   ========================================================================== */
+.glass {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(var(--blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--glass-sat));
+  box-shadow: var(--shadow);
+}
+
+/* "Frosted glass" off: keep the transparency, drop the blur. */
+body.no-glass .glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The solid theme is deliberately opaque. */
+body.theme-solid-dark .glass {
+  background: var(--panel-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px 16px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.view[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   Top bar + tabs
+   ========================================================================== */
+.topbar {
+  border-radius: var(--radius);
+  padding: 12px 14px 10px;
+}
+
+.topbar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  background: var(--input-bg);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 4px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.is-active {
+  background: var(--panel-2-bg);
+  color: var(--text);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* ==========================================================================
+   Timer view
+   ========================================================================== */
+.phase {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.phase--work { color: var(--accent); }
+.phase--break { color: var(--break); }
+
+.ring {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  margin: 0 auto;
+}
+
+.ring__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring__track {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 10;
+}
+
+.ring__progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: var(--ring-circumference);
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.6s linear, stroke 0.3s;
+}
+
+.ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.ring__time {
+  font-size: 44px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.ring__status {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.dot--done {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.focus-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.focus-chip:hover {
+  border-color: var(--accent);
+}
+
+.focus-chip__label {
+  color: var(--text-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.focus-chip__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.focus-chip__count {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--panel-2-bg);
+  transition: transform 0.08s, opacity 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+  min-width: 120px;
+  padding: 13px 24px;
+  font-size: 15px;
+  box-shadow: 0 6px 20px var(--accent-soft);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+}
+
+.btn--ghost:hover { color: var(--text); }
+
+.btn--small { padding: 8px 13px; font-size: 13px; }
+
+.btn--full { width: 100%; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--panel-2-bg);
+}
+
+/* ==========================================================================
+   Panels
+   ========================================================================== */
+.panel {
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.panel__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.panel__header h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.panel__hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel__foot {
+  margin-top: 12px;
+}
+
+/* ==========================================================================
+   Progress bars
+   ========================================================================== */
+.progress {
+  height: 9px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.progress--lg { height: 13px; }
+
+.progress__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--break));
+  transition: width 0.5s ease;
+}
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  justify-content: space-between;
+}
+
+.field__value { color: var(--text); }
+
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.mini-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-field > span {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 9px 11px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+}
+
+select option {
+  background: #151922;
+  color: #eef1f7;
+}
+
+body.theme-glass-light select option {
+  background: #ffffff;
+  color: #191f2c;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.switch input { display: none; }
+
+.switch__slider {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--border-color);
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.switch__slider::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.switch input:checked + .switch__slider { background: var(--accent); }
+.switch input:checked + .switch__slider::after { transform: translateX(18px); }
+
+/* ==========================================================================
+   To-do list
+   ========================================================================== */
+.todo-form {
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.todo-form__main {
+  display: flex;
+  gap: 8px;
+}
+
+.todo-form__extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mini-field--wide { grid-column: 1 / -1; }
+
+.todo-form__more {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.todo-form__more:hover { color: var(--accent); }
+
+.filters {
+  display: flex;
+  gap: 6px;
+}
+
+.chip {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo {
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+}
+
+.todo--active { border-color: var(--accent); }
+.todo--done { opacity: 0.62; }
+
+.todo__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.todo__check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.2s;
+}
+
+.todo__check:hover { border-color: var(--accent); }
+
+.todo--done .todo__check {
+  background: var(--break);
+  border-color: var(--break);
+}
+
+.todo__body { flex: 1; min-width: 0; }
+
+.todo__title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+  cursor: text;
+}
+
+.todo--done .todo__title {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.todo__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--panel-2-bg);
+  color: var(--text-dim);
+}
+
+.badge--high { background: rgba(229, 72, 77, 0.18); color: #ff8b8e; }
+.badge--medium { background: rgba(245, 181, 68, 0.18); color: #f5b544; }
+.badge--low { background: rgba(86, 180, 247, 0.16); color: #56b4f7; }
+.badge--due-soon { background: rgba(229, 72, 77, 0.18); color: #ff8b8e; }
+.badge--overdue { background: var(--danger); color: #fff; }
+.badge--active { background: var(--accent-soft); color: var(--accent); }
+.badge--pomo { background: var(--accent-soft); color: var(--accent); }
+.badge--done { background: var(--break-soft); color: var(--break); }
+
+.todo__actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.mini-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mini-btn:hover {
+  background: var(--panel-2-bg);
+  color: var(--text);
+}
+
+.mini-btn--danger:hover { color: var(--danger); }
+
+.todo__detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo__notes {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.subtasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.subtask__check {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: #fff;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.subtask--done .subtask__check {
+  background: var(--break);
+  border-color: var(--break);
+}
+
+.subtask--done .subtask__title {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.subtask__title { flex: 1; min-width: 0; word-break: break-word; }
+
+.subtask-form {
+  display: flex;
+  gap: 6px;
+}
+
+.subtask-form input { flex: 1; padding: 7px 10px; font-size: 13px; }
+
+.empty {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 26px 10px;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius);
+}
+
+/* ==========================================================================
+   Goals
+   ========================================================================== */
+.goal-form {
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.goal-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.goal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goal {
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.goal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.goal__title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.goal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.goal__count {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  margin-top: 7px;
+}
+
+/* ==========================================================================
+   Stats
+   ========================================================================== */
+.stats {
+  display: flex;
+  gap: 10px;
+}
+
+.stat {
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  padding: 11px 8px;
+  text-align: center;
+}
+
+.stat__value {
+  font-size: 21px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  height: 120px;
+  padding-top: 8px;
+}
+
+.chart__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart__bar {
+  width: 100%;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-soft));
+  min-height: 3px;
+  transition: height 0.5s ease;
+}
+
+.chart__label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chart__value {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.modal[hidden] { display: none; }
+
+.modal__card {
+  border-radius: var(--radius);
+  padding: 18px;
+  width: 100%;
+  max-width: 380px;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+/* Dialogs need to stay readable regardless of the glass opacity. */
+.modal__card.glass {
+  background: rgb(var(--panel-rgb) / max(var(--panel-alpha), 0.32));
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal__header h2 { margin: 0; font-size: 16px; }
+
+.modal__section {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin: 4px 0 -2px;
+  font-weight: 700;
+}
+
+/* Theme picker */
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.theme-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 9px;
+  cursor: pointer;
+  background: var(--input-bg);
+  text-align: left;
+  color: var(--text);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.theme-card:hover { border-color: var(--text-dim); }
+
+.theme-card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.theme-card__preview {
+  height: 34px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.theme-card__preview::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.theme-card__name {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.swatches {
+  display: flex;
+  gap: 9px;
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s;
+}
+
+.swatch:hover { transform: scale(1.12); }
+
+.swatch.is-active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px currentColor;
+}
+
+.shortcuts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.shortcuts li { display: flex; align-items: center; gap: 8px; }
+
+kbd {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text);
+}
+
+@media (max-width: 380px) {
+  .ring { width: 185px; height: 185px; }
+  .ring__time { font-size: 38px; }
+  .app { padding: 12px 12px 30px; }
+}

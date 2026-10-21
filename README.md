@@ -1,0 +1,140 @@
+# Pomodoro
+
+A focus timer desktop app built with **Tauri** (Rust backend + vanilla JS frontend), with a
+glassmorphic UI, a to-do list, and a flexible goal tracker.
+
+## Features
+
+### Timer
+- **Classic cycle** — 25 min focus, 5 min short break, 15 min long break every 4 rounds.
+  Every duration is configurable.
+- **Auto-advance** — phases move on automatically (toggleable).
+- **Pause / skip / reset** — full manual control, plus a session-dot indicator.
+- **Sound + notifications** — a chime and a native macOS notification when a phase ends.
+- **Daily target** — configurable pomodoros-per-day goal with a live progress bar.
+
+### To-do list
+- Add, complete, delete, and reorder-by-priority tasks.
+- **Priority** (none / low / medium / high), **due date** with overdue & due-soon badges.
+- **Notes** and **subtasks** (checklist) per task.
+- One task can be the **active** focus — completed pomodoros are counted against it.
+
+### Goals
+- Flexible goals measured in **pomodoros** or **focus hours**.
+- **All-time** or **daily** scope, with an optional deadline.
+- Live progress bars, percentage, and an "Achieved" badge when the target is met.
+
+### Stats
+- Today: pomodoros, focus time, tasks completed.
+- All-time totals.
+- A 7-day bar chart of pomodoros.
+
+### Control
+- **Themes** — four built in: *Glass Dark*, *Glass Light*, *Aurora*, *Solid Dark*
+  (solid is a low-spec fallback with no blur).
+- **Accent colour** — six accent colours.
+- **Glass tuning** — a **blur** slider (0–40px) and a **glass opacity** slider
+  (0–100%). Drop the opacity to 0% and the panels disappear entirely, letting
+  the background show through so you can match it to any wallpaper.
+- **Keyboard shortcuts** — `Space` start/pause, `S` skip, `R` reset, `N` new task,
+  `1`–`4` switch tab, `Esc` close dialog.
+- **Menu bar tray** — the app lives in the macOS status bar with Show / Start-Pause /
+  Skip / Reset / Quit, and clicking the dock icon brings the window back.
+- All settings persist to disk.
+
+## Architecture
+
+```
+pomodoro-app/
+├── index.html            # app shell (tabbed views)
+├── dev/                  # dev-only UI preview harness (not shipped)
+├── vite.config.js
+├── src/
+│   ├── main.js           # UI logic, rendering, theming, shortcuts
+│   └── style.css         # glassmorphism + theme tokens
+└── src-tauri/            # Rust backend
+    ├── tauri.conf.json
+    ├── capabilities/
+    └── src/
+        ├── main.rs       # entry point
+        ├── lib.rs        # commands, background ticker, tray
+        ├── timer.rs      # timer state machine
+        └── store.rs      # todos, goals, settings, daily history
+```
+
+### How it works
+
+- `timer.rs` holds the state machine (`Work` / `ShortBreak` / `LongBreak`), remaining time
+  and cycle count.
+- `lib.rs` owns an `AppState` protected by a single `Mutex`. A background thread ticks every
+  second, emits a `state` event to the frontend, and fires a notification when a phase ends.
+- Commands (`toggle`, `add_todo`, `add_goal`, `set_theme`, …) are exposed to the frontend
+  via `invoke`. Struct-typed arguments use serde's snake_case field names.
+- `store.rs` persists todos, goals, settings, and per-day stats to `pomodoro-data.json` in
+  the macOS app data directory.
+
+## Getting started
+
+Requirements: [Node.js](https://nodejs.org), the [Rust toolchain](https://rustup.rs),
+and macOS build tools (`xcode-select --install`).
+
+```bash
+npm install
+npm run dev      # launch the app in development
+npm run build    # produce a distributable .app bundle
+```
+
+Useful Tauri CLI commands:
+
+```bash
+npx tauri dev
+npx tauri build
+npx tauri icon path/to/source.png   # regenerate icons
+```
+
+### UI preview without the Rust backend
+
+`dev/mock.html` renders the real UI against a mocked backend, which is handy for
+iterating on styles without rebuilding the Rust side:
+
+```bash
+npm run preview
+# → http://localhost:5174/dev/mock.html
+```
+
+The preview file is generated from `index.html` on every build, so it can never
+drift out of sync. It accepts query parameters for previewing different states:
+
+```
+?tab=timer|todos|goals|stats   &modal=settings
+&theme=glass-dark|glass-light|aurora|solid-dark
+&accent=coral|violet|mint|sky|amber|pink
+&opacity=0..100               &key=space|s|r|n|1|2|3|4
+```
+
+## License
+
+Released under the [MIT License](LICENSE). Use it, fork it, ship it — just keep
+the copyright notice.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev setup, project layout, and
+the conventions for adding features.
+
+### macOS notes
+
+- **Code signing** — `tauri.conf.json` sets `signingIdentity: "-"` (ad-hoc). The app runs
+  fine, but Gatekeeper may warn on first launch; right-click → Open to bypass. Set a real
+  Developer ID to distribute properly.
+- **DMG creation** — building the `.dmg` runs a Finder AppleScript and therefore needs a
+  graphical session. In a headless/CI environment use `npx tauri build --bundles app`.
+
+## Tests
+
+```bash
+cd src-tauri && cargo test
+```
+
+The Rust suite covers the timer state machine, todo/goal mutations, settings persistence,
+and the JSON wire format shared with the frontend.

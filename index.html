@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="theme-glass-dark">
+    <div class="aurora" aria-hidden="true">
+      <span class="aurora__blob aurora__blob--1"></span>
+      <span class="aurora__blob aurora__blob--2"></span>
+      <span class="aurora__blob aurora__blob--3"></span>
+    </div>
+
+    <main class="app">
+      <header class="topbar glass">
+        <div class="topbar__row">
+          <h1 class="brand">Pomodoro</h1>
+          <button id="settingsToggle" class="icon-btn" title="Settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+
+        <nav class="tabs" id="tabs" role="tablist">
+          <button class="tab is-active" data-tab="timer" role="tab">Timer</button>
+          <button class="tab" data-tab="todos" role="tab">To-Do</button>
+          <button class="tab" data-tab="goals" role="tab">Goals</button>
+          <button class="tab" data-tab="stats" role="tab">Stats</button>
+        </nav>
+      </header>
+
+      <!-- ================= TIMER ================= -->
+      <section class="view is-active" data-view="timer">
+        <div class="phase" id="phaseLabel">Focus</div>
+
+        <div class="ring">
+          <svg viewBox="0 0 220 220" class="ring__svg">
+            <circle class="ring__track" cx="110" cy="110" r="100" />
+            <circle class="ring__progress" id="ringProgress" cx="110" cy="110" r="100" />
+          </svg>
+          <div class="ring__center">
+            <div class="ring__time" id="timeDisplay">25:00</div>
+            <div class="ring__status" id="statusDisplay">Ready</div>
+          </div>
+        </div>
+
+        <div class="dots" id="dots" aria-label="Sessions in this cycle"></div>
+
+        <div class="controls">
+          <button class="btn btn--ghost" id="resetBtn" title="Reset current phase (R)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset
+          </button>
+          <button class="btn btn--primary" id="toggleBtn">Start</button>
+          <button class="btn btn--ghost" id="skipBtn" title="Skip to next phase (S)">
+            Skip
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/><line x1="19" y1="3" x2="19" y2="21"/></svg>
+          </button>
+        </div>
+
+        <div class="focus-chip glass" id="focusChip">
+          <span class="focus-chip__label">Working on</span>
+          <span class="focus-chip__name" id="focusTaskName">Nothing selected</span>
+          <span class="focus-chip__count" id="focusTaskCount">0 🍅</span>
+        </div>
+
+        <div class="panel glass">
+          <div class="panel__header">
+            <h2>Daily goal</h2>
+            <span class="panel__hint" id="dailyGoalHint">0 / 5</span>
+          </div>
+          <div class="progress"><div class="progress__fill" id="dailyGoalFill"></div></div>
+        </div>
+      </section>
+
+      <!-- ================= TO-DO ================= -->
+      <section class="view" data-view="todos" hidden>
+        <form class="todo-form glass" id="todoForm">
+          <div class="todo-form__main">
+            <input type="text" id="todoTitle" placeholder="Add a task…" autocomplete="off" />
+            <button type="submit" class="btn btn--primary btn--small">Add</button>
+          </div>
+          <div class="todo-form__extra" id="todoFormExtra" hidden>
+            <label class="mini-field">
+              <span>Priority</span>
+              <select id="todoPriority">
+                <option value="none">None</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label class="mini-field">
+              <span>Due</span>
+              <input type="date" id="todoDue" />
+            </label>
+            <label class="mini-field mini-field--wide">
+              <span>Notes</span>
+              <input type="text" id="todoNotes" placeholder="Optional notes" autocomplete="off" />
+            </label>
+          </div>
+          <button type="button" class="todo-form__more" id="todoFormMore" aria-expanded="false">
+            + details
+          </button>
+        </form>
+
+        <div class="filters" id="todoFilters">
+          <button class="chip is-active" data-filter="all">All</button>
+          <button class="chip" data-filter="active">Open</button>
+          <button class="chip" data-filter="done">Done</button>
+        </div>
+
+        <ul class="todo-list" id="todoList"></ul>
+      </section>
+
+      <!-- ================= GOALS ================= -->
+      <section class="view" data-view="goals" hidden>
+        <div class="panel glass">
+          <div class="panel__header">
+            <h2>Today’s target</h2>
+            <span class="panel__hint" id="dailyTargetHint">0 / 5 pomodoros</span>
+          </div>
+          <div class="progress progress--lg"><div class="progress__fill" id="dailyTargetFill"></div></div>
+          <div class="panel__foot">
+            <label class="mini-field">
+              <span>Daily target</span>
+              <input type="number" id="dailyGoalInput" min="1" max="50" />
+            </label>
+          </div>
+        </div>
+
+        <form class="goal-form glass" id="goalForm">
+          <div class="panel__header">
+            <h2>New goal</h2>
+          </div>
+          <input type="text" id="goalTitle" placeholder="What are you aiming for?" autocomplete="off" />
+          <div class="goal-form__row">
+            <label class="mini-field">
+              <span>Measure</span>
+              <select id="goalKind">
+                <option value="pomodoros">Pomodoros</option>
+                <option value="focus_hours">Focus hours</option>
+              </select>
+            </label>
+            <label class="mini-field">
+              <span>Scope</span>
+              <select id="goalScope">
+                <option value="all_time">All time</option>
+                <option value="daily">Daily</option>
+              </select>
+            </label>
+            <label class="mini-field">
+              <span>Target</span>
+              <input type="number" id="goalTarget" min="1" max="9999" value="10" />
+            </label>
+            <label class="mini-field">
+              <span>Deadline</span>
+              <input type="date" id="goalDeadline" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">Create goal</button>
+        </form>
+
+        <ul class="goal-list" id="goalList"></ul>
+      </section>
+
+      <!-- ================= STATS ================= -->
+      <section class="view" data-view="stats" hidden>
+        <div class="panel glass">
+          <div class="panel__header">
+            <h2>Today</h2>
+            <span class="panel__hint" id="dateLabel"></span>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat__value" id="statPomodoros">0</div>
+              <div class="stat__label">Pomodoros</div>
+            </div>
+            <div class="stat">
+              <div class="stat__value" id="statFocus">0m</div>
+              <div class="stat__label">Focus time</div>
+            </div>
+            <div class="stat">
+              <div class="stat__value" id="statTasks">0</div>
+              <div class="stat__label">Tasks done</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel glass">
+          <div class="panel__header">
+            <h2>All time</h2>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat__value" id="allPomodoros">0</div>
+              <div class="stat__label">Pomodoros</div>
+            </div>
+            <div class="stat">
+              <div class="stat__value" id="allFocus">0m</div>
+              <div class="stat__label">Focus time</div>
+            </div>
+            <div class="stat">
+              <div class="stat__value" id="allTasks">0</div>
+              <div class="stat__label">Tasks done</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel glass">
+          <div class="panel__header">
+            <h2>Last 7 days</h2>
+          </div>
+          <div class="chart" id="weekChart"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= SETTINGS ================= -->
+    <div class="modal" id="settingsModal" hidden>
+      <div class="modal__card glass" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="modal__header">
+          <h2 id="settingsTitle">Settings</h2>
+          <button class="icon-btn" id="settingsClose" aria-label="Close settings">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <h3 class="modal__section">Appearance</h3>
+        <div class="theme-grid" id="themeGrid"></div>
+
+        <div class="field">
+          <label>Accent colour</label>
+          <div class="swatches" id="accentSwatches"></div>
+        </div>
+
+        <div class="field">
+          <label for="blurRange">Glass blur <span class="field__value" id="blurValue">18px</span></label>
+          <input type="range" id="blurRange" min="0" max="40" step="1" />
+        </div>
+
+        <div class="field">
+          <label for="opacityRange">Glass opacity <span class="field__value" id="opacityValue">6%</span></label>
+          <input type="range" id="opacityRange" min="0" max="100" step="1" />
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="glassEnabled" checked />
+          <span class="switch__slider"></span>
+          <span class="switch__label">Frosted glass panels</span>
+        </label>
+
+        <h3 class="modal__section">Timer</h3>
+        <div class="field-row">
+          <label class="mini-field">
+            <span>Focus (min)</span>
+            <input type="number" id="workMinutes" min="1" max="180" />
+          </label>
+          <label class="mini-field">
+            <span>Short break</span>
+            <input type="number" id="shortBreakMinutes" min="1" max="60" />
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="mini-field">
+            <span>Long break</span>
+            <input type="number" id="longBreakMinutes" min="1" max="90" />
+          </label>
+          <label class="mini-field">
+            <span>Long break every</span>
+            <input type="number" id="longBreakInterval" min="1" max="12" />
+          </label>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="autoAdvance" />
+          <span class="switch__slider"></span>
+          <span class="switch__label">Automatically advance phases</span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="soundEnabled" checked />
+          <span class="switch__slider"></span>
+          <span class="switch__label">Play sound when a phase ends</span>
+        </label>
+
+        <h3 class="modal__section">Shortcuts</h3>
+        <ul class="shortcuts">
+          <li><kbd>Space</kbd> start / pause</li>
+          <li><kbd>S</kbd> skip phase</li>
+          <li><kbd>R</kbd> reset phase</li>
+          <li><kbd>N</kbd> new task</li>
+          <li><kbd>1</kbd>–<kbd>4</kbd> switch tab</li>
+          <li><kbd>Esc</kbd> close dialog</li>
+        </ul>
+
+        <button class="btn btn--primary btn--full" id="saveSettings">Save settings</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
