@@ -239,7 +239,7 @@ mod tests {
         t.phase = Phase::ShortBreak;
         t.advance();
         assert_eq!(t.phase, Phase::Work);
-        assert_eq!(t.total_secs, 1 * 60);
+        assert_eq!(t.total_secs, 60);
     }
 
     #[test]

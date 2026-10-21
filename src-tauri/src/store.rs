@@ -198,13 +198,10 @@ impl Store {
             .map(|offset| {
                 let day = today - Duration::days(offset as i64);
                 let key = day.format("%Y-%m-%d").to_string();
-                self.history
-                    .get(&key)
-                    .cloned()
-                    .unwrap_or(DailyStats {
-                        date: key,
-                        ..Default::default()
-                    })
+                self.history.get(&key).cloned().unwrap_or(DailyStats {
+                    date: key,
+                    ..Default::default()
+                })
             })
             .collect()
     }
@@ -268,11 +265,7 @@ impl Store {
         let done = match self.todos.iter_mut().find(|t| t.id == id) {
             Some(task) => {
                 task.done = !task.done;
-                task.completed_at = if task.done {
-                    Some(today)
-                } else {
-                    None
-                };
+                task.completed_at = if task.done { Some(today) } else { None };
                 task.done
             }
             None => return,
@@ -299,7 +292,11 @@ impl Store {
         let id = self.next_subtask_id;
         self.next_subtask_id += 1;
         if let Some(task) = self.todos.iter_mut().find(|t| t.id == todo_id) {
-            task.subtasks.push(Subtask { id, title, done: false });
+            task.subtasks.push(Subtask {
+                id,
+                title,
+                done: false,
+            });
         }
     }
 
@@ -400,7 +397,12 @@ mod tests {
     fn add_todo_assigns_ids_and_activates_newest() {
         let mut s = Store::default();
         let a = s.add_todo("First".into(), Priority::None, None, None);
-        let b = s.add_todo("Second".into(), Priority::High, Some("2026-12-31".into()), None);
+        let b = s.add_todo(
+            "Second".into(),
+            Priority::High,
+            Some("2026-12-31".into()),
+            None,
+        );
         assert_eq!(a.id, 0);
         assert_eq!(b.id, 1);
         assert_eq!(s.todos.len(), 2);
@@ -513,7 +515,12 @@ mod tests {
     fn save_and_load_roundtrip() {
         let path = tmp_path();
         let mut s = Store::default();
-        s.add_todo("Persisted".into(), Priority::High, None, Some("note".into()));
+        s.add_todo(
+            "Persisted".into(),
+            Priority::High,
+            None,
+            Some("note".into()),
+        );
         s.add_goal(
             "Goal".into(),
             GoalKind::Pomodoros,
@@ -608,7 +615,10 @@ mod tests {
     fn theme_prefs_default_opacity_is_translucent() {
         let prefs = ThemePrefs::default();
         assert_eq!(prefs.opacity, 6);
-        assert!(prefs.opacity < 100, "glass should not be fully opaque by default");
+        assert!(
+            prefs.opacity < 100,
+            "glass should not be fully opaque by default"
+        );
     }
 
     #[test]
@@ -642,7 +652,12 @@ mod tests {
     #[test]
     fn todo_serialises_with_expected_keys() {
         let mut s = Store::default();
-        s.add_todo("Wire".into(), Priority::Medium, Some("2026-10-30".into()), None);
+        s.add_todo(
+            "Wire".into(),
+            Priority::Medium,
+            Some("2026-10-30".into()),
+            None,
+        );
         let value = serde_json::to_value(&s.todos[0]).unwrap();
         for key in [
             "id",

@@ -13,9 +13,7 @@ use tauri::menu::{Menu, MenuItem};
 #[cfg(desktop)]
 use tauri::tray::TrayIconBuilder;
 
-use store::{
-    DailyStats, Goal, GoalKind, GoalScope, Priority, Store, ThemePrefs, Todo, Totals,
-};
+use store::{DailyStats, Goal, GoalKind, GoalScope, Priority, Store, ThemePrefs, Todo, Totals};
 use timer::{Config, Phase, Timer};
 
 /// Shared, mutable application state. Guarded by a single mutex so the tick
@@ -196,17 +194,23 @@ fn remove_todo(app: AppHandle, state: State<AppState>, id: u64) {
 
 #[tauri::command]
 fn add_subtask(app: AppHandle, state: State<AppState>, todo_id: u64, title: String) {
-    mutate(&app, &state, |inner| inner.store.add_subtask(todo_id, title));
+    mutate(&app, &state, |inner| {
+        inner.store.add_subtask(todo_id, title)
+    });
 }
 
 #[tauri::command]
 fn toggle_subtask(app: AppHandle, state: State<AppState>, todo_id: u64, subtask_id: u64) {
-    mutate(&app, &state, |inner| inner.store.toggle_subtask(todo_id, subtask_id));
+    mutate(&app, &state, |inner| {
+        inner.store.toggle_subtask(todo_id, subtask_id)
+    });
 }
 
 #[tauri::command]
 fn remove_subtask(app: AppHandle, state: State<AppState>, todo_id: u64, subtask_id: u64) {
-    mutate(&app, &state, |inner| inner.store.remove_subtask(todo_id, subtask_id));
+    mutate(&app, &state, |inner| {
+        inner.store.remove_subtask(todo_id, subtask_id)
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -246,12 +250,7 @@ fn notify(app: &AppHandle, finished: Phase) {
         Phase::ShortBreak => ("Break over", "Ready for another focus session?"),
         Phase::LongBreak => ("Long break over", "Time to get back to it."),
     };
-    let _ = app
-        .notification()
-        .builder()
-        .title(title)
-        .body(body)
-        .show();
+    let _ = app.notification().builder().title(title).body(body).show();
 }
 
 /// Android 13 (API 33) introduced a runtime permission for notifications.
@@ -408,7 +407,7 @@ pub fn run() {
         .expect("error while building tauri application");
 
     // Show the window again when the macOS dock icon is clicked.
-    app.run(|handle, event| on_run_event(handle, event));
+    app.run(on_run_event);
 }
 
 /// macOS delivers `Reopen` when the dock icon is clicked; other platforms
@@ -416,7 +415,8 @@ pub fn run() {
 #[cfg(target_os = "macos")]
 fn on_run_event(handle: &AppHandle, event: tauri::RunEvent) {
     if let tauri::RunEvent::Reopen {
-        has_visible_windows, ..
+        has_visible_windows,
+        ..
     } = event
     {
         if !has_visible_windows {
