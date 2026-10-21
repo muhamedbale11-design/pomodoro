@@ -205,6 +205,41 @@ The APKs are written to `src-tauri/gen/android/app/build/outputs/apk/`.
 `ANDROID_HOME`, `ANDROID_SDK_ROOT`, `NDK_HOME` and `JAVA_HOME` must point at
 your SDK/JDK installations.
 
+### Signing
+
+A release signing key lives outside the repository, so the credentials are
+never committed:
+
+```
+~/tools/android-build/keystore/pomodoro-release.jks
+~/tools/android-build/keystore/credentials.txt
+```
+
+`src-tauri/gen/android/key.properties` points Gradle at that keystore, and is
+listed in the Android project's `.gitignore`.
+
+> **Back these two files up somewhere safe.** The Play Console requires the
+> *same* upload key for every update you publish — if you lose it you must ask
+> Google to reset it, and existing installs will not accept the new build
+> until they are updated by hand.
+
+To build a Play-ready bundle:
+
+```bash
+npx tauri android build --aab
+```
+
+The `.aab` is written to `src-tauri/gen/android/app/build/outputs/bundle/`.
+
+### Installing on a device
+
+```bash
+adb install -r src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+```
+
+Debug builds use the `.debug` application id suffix, so they can be
+installed alongside a release build.
+
 ### What differs on Android
 
 | | Desktop | Android |

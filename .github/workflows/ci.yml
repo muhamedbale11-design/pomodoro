@@ -136,7 +136,9 @@ jobs:
         run: npx tauri android init --ci
 
       - name: Build the debug APK
-        run: npx tauri android build --apk --target aarch64
+        # The debug variant is signed with the standard Android debug key, so
+        # the artifact can be installed on a device straight away.
+        run: npx tauri android build --apk --debug --target aarch64
 
       - uses: actions/upload-artifact@v4
         with:
