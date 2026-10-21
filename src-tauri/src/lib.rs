@@ -254,6 +254,22 @@ fn notify(app: &AppHandle, finished: Phase) {
         .show();
 }
 
+/// Android 13 (API 33) introduced a runtime permission for notifications.
+/// Without it, `show()` silently does nothing.
+#[cfg(target_os = "android")]
+fn request_notification_permission(app: &AppHandle) {
+    use tauri_plugin_notification::PermissionState;
+
+    if let Ok(state) = app.notification().permission_state() {
+        if matches!(
+            state,
+            PermissionState::Prompt | PermissionState::PromptWithRationale
+        ) {
+            let _ = app.notification().request_permission();
+        }
+    }
+}
+
 fn spawn_ticker(app: AppHandle) {
     std::thread::spawn(move || loop {
         std::thread::sleep(Duration::from_secs(1));
@@ -362,6 +378,8 @@ pub fn run() {
             spawn_ticker(app.handle().clone());
             #[cfg(desktop)]
             build_tray(app.handle())?;
+            #[cfg(target_os = "android")]
+            request_notification_permission(app.handle());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

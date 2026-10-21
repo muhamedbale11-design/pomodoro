@@ -1,7 +1,13 @@
 # Pomodoro
 
+[![CI](https://github.com/muhamedbale11-design/pomodoro/actions/workflows/ci.yml/badge.svg)](https://github.com/muhamedbale11-design/pomodoro/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-coral.svg)](LICENSE)
+[![Tauri](https://img.shields.io/badge/tauri-2-blue.svg)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/rust-stable-orange.svg)](https://www.rust-lang.org)
+
 A focus timer desktop app built with **Tauri** (Rust backend + vanilla JS frontend), with a
-glassmorphic UI, a to-do list, and a flexible goal tracker.
+glassmorphic UI, a to-do list, and a flexible goal tracker. Runs on macOS, Windows, Linux
+and Android.
 
 ## Features
 
@@ -176,7 +182,42 @@ the copyright notice.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev setup, project layout, and
 the conventions for adding features.
 
-### macOS notes
+### Building for Android
+
+The same source tree builds for Android. On macOS:
+
+```bash
+# 1. Toolchain: JDK 17, Android SDK (platform 35, build-tools 35, NDK 27)
+#    and the Rust Android targets.
+rustup target add aarch64-linux-android armv7-linux-androideabi \
+                 i686-linux-android x86_64-linux-android
+
+# 2. Generate the Gradle project (once)
+npx tauri android init --ci
+
+# 3. Build
+npx tauri android build --apk      # debug APK
+npx tauri android build --aab      # bundle for the Play Console
+```
+
+The APKs are written to `src-tauri/gen/android/app/build/outputs/apk/`.
+
+`ANDROID_HOME`, `ANDROID_SDK_ROOT`, `NDK_HOME` and `JAVA_HOME` must point at
+your SDK/JDK installations.
+
+### What differs on Android
+
+| | Desktop | Android |
+| --- | --- | --- |
+| Menu bar tray | yes | compiled out (`#[cfg(desktop)]`) |
+| Dock / dock click | yes | n/a |
+| System notifications | yes | yes, via the notification plugin |
+| Keyboard shortcuts | yes | n/a (no hardware keyboard assumed) |
+| Data storage | app data dir | app data dir (sandboxed) |
+
+The layout is the same single-column design, tuned for a phone-sized viewport.
+
+## macOS notes
 
 - **Code signing** — `tauri.conf.json` sets `signingIdentity: "-"` (ad-hoc). The app runs
   fine, but Gatekeeper may warn on first launch; right-click → Open to bypass. Set a real

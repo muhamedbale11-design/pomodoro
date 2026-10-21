@@ -38,6 +38,10 @@
     ],
     "macOS": {
       "signingIdentity": "-"
+    },
+    "android": {
+      "minSdkVersion": 24,
+      "debugApplicationIdSuffix": ".debug"
     }
   }
 }
