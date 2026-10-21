@@ -127,10 +127,6 @@ git remote add origin git@github.com:<you>/pomodoro.git
 git push -u origin main
 ```
 
-> The repository currently uses a local placeholder git identity
-> (`mohamedalaa@users.noreply.github.com`). Set your real name and email with
-> `git config user.name "..."` / `git config user.email "..."` before pushing.
-
 ### Mac App Store
 
 Possible, with some caveats. You need an Apple Developer Program membership
