@@ -357,6 +357,12 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
 // Entry point
 // ---------------------------------------------------------------------------
 
+/// Entry point.
+///
+/// On mobile this is not called directly: the `mobile_entry_point` attribute
+/// turns it into the JNI entry point that Android loads, which is why the
+/// attribute is applied conditionally.
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
